@@ -17,34 +17,31 @@
 
 int main(int argc, char **argv) {
 
-	int ch;
 	char *pos;
 	char s[MAX_BUF+2];   // 2 extra for the newline and ending '\0'
 	static const char prompt[] = "(egsh) ";
 	char *toks[MAX_TOKS];
 	char *tok;
 	char *toks2[MAX_TOKS];
-	
-	// 
-	// YOUR CODE HERE   (add declarations as needed)
-	//
-       	int i;
+	char cwd[MAX_BUF];
+	char* file;
+	char* status;
+
+	int ch;
+    int i;
 	int k = 0;
 	int day;
 	int month;
 	int year;
-	FILE* strm;
-	char* file;
-	char* status;
-	FILE* strm2;
 	int flag = 0;
 	int tracker1 = 0;
 	int tracker2 = 0;
 	int l = 0;
 	int done = 1;
 	int r = 0;		
-	char cwd[MAX_BUF];
   	struct dirent *dp;
+	FILE* strm;
+	FILE* strm2;
   	DIR *dirp;  
       	
 	//check if any arguments were added to run command
@@ -54,33 +51,34 @@ int main(int argc, char **argv) {
 	  /* printf("%d\n", dup(fileno(strm))); */
        }
 
-  while (1) {
-    if (argc > 1) {
-      char *status = fgets(s, MAX_BUF+2, strm);
-      if (status == NULL) {
+  	while (1) {
+    	if (argc > 1) {
+  	    char *status = fgets(s, MAX_BUF+2, strm);
+  	    if (status == NULL) {
 	printf("\n");
 	break;
       }
-    } else {
-      // prompt for input if input from terminal
-      if (isatty(fileno(stdin))) {
-        if (getcwd(cwd, MAX_BUF) != NULL) {
-          printf("%s%s: ", prompt, cwd);
-        } else {
-          printf("error: unable to get current working directory\n");
-          printf(prompt);
-        }
-      }
+  	  	} else {
+   	    // prompt for input if input from terminal
+   	   		if (isatty(fileno(stdin))) {
+     	   		if (getcwd(cwd, MAX_BUF) != NULL) {
+					printf("%s%s: ", prompt, cwd);
+     	   } else {
+      	    	printf("error: unable to get current working directory\n");
+     	    	printf(prompt);
+      	   }
+    	}
 
-		// read input
-		status = fgets(s, MAX_BUF+2, stdin);
+			// read input
+			status = fgets(s, MAX_BUF+2, stdin);
 	  
-		// exit if ^d entered
-		if (status == NULL) {
-			printf("\n");
-			break;
-		}
+			// exit if ^d entered
+			if (status == NULL) {
+				printf("\n");
+				break;
+			}
 	    }
+
 		// input is too long if last character is not newline 
 		if ((pos = strchr(s, '\n')) == NULL) {
 			printf("error: input too long\n");
@@ -92,12 +90,6 @@ int main(int argc, char **argv) {
 		// remove trailing newline
 		*pos = '\0';
 
-                //
-		// your code here
-	        //
-		//
-
-				
 		time_t t;
 		time(&t);
 		struct tm *today = localtime(&t);
@@ -158,14 +150,16 @@ int main(int argc, char **argv) {
 		    printf("(egsh): %s: %s: %s\n", toks[0], toks[1], strerror(errno));
 		  }
 		}
-
-		else { // create new thread
+		// create new thread
+		else { 
 		  int rc = fork();
-		  if (rc < 0) { // fork failed
+		  // fork failed
+		  if (rc < 0) { 
 		    fprintf(stderr, "fork failed\n");
 		    exit(1);		      
 		  }
-		  else if (rc == 0) { // new child process
+		  // new child process
+		  else if (rc == 0) { 
 		    l = 0;
 		    k = 0;
 		    while (toks[k] != NULL) {
@@ -194,8 +188,9 @@ int main(int argc, char **argv) {
 		        k++;
 		       }
 		    }
-		    toks2[l] = NULL;		    
-		    execvp(toks2[0], toks2); // execute linux commands
+		    toks2[l] = NULL;
+			// execute linux commands		    
+		    execvp(toks2[0], toks2); 
 		    printf("(egsh): %s: %s\n", toks2[0], strerror(errno));    
 		    exit(1);			
 		  }
@@ -206,3 +201,4 @@ int main(int argc, char **argv) {
 	}
 	exit(EXIT_SUCCESS);	
 }
+
